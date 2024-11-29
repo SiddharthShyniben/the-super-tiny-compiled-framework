@@ -101,7 +101,7 @@
 
 /*
  * Today we're going to write a tiny compiled framework together. A teeny tiny
- * one, in about 600 lines if you removed all the comments from this file, but
+ * one, in about 350 lines if you removed all the comments from this file, but
  * powerful enough to implement most of the core features of a mature compiled
  * framework like Svelte!
  *
