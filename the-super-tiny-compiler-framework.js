@@ -142,6 +142,7 @@
  *	</style>
  *
  * And Hello.sleek looks like this:
+ *
  *	<h1>Hello</h1>
  *
  *	<style>
@@ -252,10 +253,10 @@
  *
  * Resolved:
  *
- * {
+ *	{
  *		const name = "dev";
  *		alert("Hello " + name)
- * }
+ *	}
  * const name = 'world';
  *
  * This resolution ensures `Hello` is a self-contained module that won’t leak
@@ -349,6 +350,11 @@
  * With this setup, any change to count anywhere in the code will trigger a
  * DOM update, with no intervention from the user! The experience feels almost
  * magical.
+ *
+ * Another thing to keep in mind is the fact that we also need to do this for
+ * variables which depend on other variables. If we have a variable, say
+ * `let greet = "Hello " + user`, any change to `user` should update the value
+ * of `greet` in the DOM too.
  */
 
 /*
@@ -371,8 +377,7 @@
  */
 
 /*
- * To help us with our task and a lot of the heavy lifting, we're going to use a
- * few libraries:
+ * To help us with our task, we're going to use a few libraries:
  *
  * - Recast: An excellent library that helps with JavaScript processing.
  *   Quoting the library's creator, it eliminates "the brain-wasting tasks, the
@@ -395,6 +400,7 @@ import { nanoid } from "nanoid";
 import { basename, extname } from "node:path";
 import { readFileSync } from "node:fs";
 
+// Typing out `types.builders` every single times gets tiring real fast...
 const b = types.builders;
 
 /*
@@ -411,6 +417,7 @@ const b = types.builders;
  * them separately.
  *
  * If this was our input:
+ *
  *	<script>
  *		const x = 42;
  *	</script>
@@ -420,9 +427,12 @@ const b = types.builders;
  *	<div>Hello World</div>
  *
  * We'd output something like this:
- *   HTML: "<div>Hello World</div>"
- *   CSS: "body { color: red; }"
- *   JS: "const x = 42;"
+ *
+ *	{
+ *		HTML: "<div>Hello World</div>",
+ *		CSS: "body { color: red; }",
+ *		JS: "const x = 42;"
+ *	}
  */
 
 // We start by accepting our input file...
@@ -1245,7 +1255,7 @@ function parseAttributeBindings({ HTML = "", CSS = "", JS = "" }) {
 
         // We're going to make yet another random slug, which we'll add as a
         // class to the tag, and use in our code
-        const eventSlug = `handle-${cleanName}-${id}`;
+        const className = `handle-${cleanName}-${id}`;
 
         // I've taken a different approach with inserting our JavaScript code
         // here, just to show you another way it could be done. We could just
@@ -1254,7 +1264,7 @@ function parseAttributeBindings({ HTML = "", CSS = "", JS = "" }) {
           "\n\n" +
           `
 function __bind__attr__${cleanName}__${id}() {
-	document.getElementsByClassName('${eventSlug}')[0].setAttribute('${cleanName}', ${value || cleanName});
+	document.getElementsByClassName('${className}')[0].setAttribute('${cleanName}', ${value || cleanName});
 }`.trim();
         // On one hand it does save us a lot of typing - this is way more
         // concise than the whole builder syntax. But on the other hand, this
@@ -1266,7 +1276,7 @@ function __bind__attr__${cleanName}__${id}() {
         // and the more things I give you to ponder, the better it teaches!
 
         // Now we're going to replace this attribute with the appropriate class
-        return { name: "class", value: eventSlug };
+        return { name: "class", value: className };
       }
 
       // If this is a regular ol' attribute, we're just gonna return it
