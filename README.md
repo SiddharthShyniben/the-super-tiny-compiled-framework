@@ -1,4 +1,4 @@
-# The Super Tiny Parsed Framework
+# The Super Tiny Compiled Framework
 
 This is a overly simplified example of all the major moving parts of a compiled
 framework, written in simple JavaScript and lovingly commented. Reading through
